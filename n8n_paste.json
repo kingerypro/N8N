@@ -1,0 +1,534 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=SCENE: [Scene Title]\nSETTING: [Brief description of the setting]\n[Character Name]: [Dialogue text only] Voice Style: [emotion]\n⚡ Critical Format Rules:\nThe [Voice Style: emotion] must come after the dialogue, not inside the quotes.\n\nThe [Scene Title] needs to not be the same as any of these video titles:{{ $json.titles }}.\nThe dialogue must not mention emotions, voice styles, or any description of actions.\n\nAbsolutely no parentheses ( ), brackets [ ], or narrator-style inserts inside the dialogue.\n\nDialogue must sound like natural, thoughtful, flowing human speech — not stiff lines.\n\nEach dialogue line should feel slightly reflective, personal, or emotionally engaged — like smart people talking late into the night.\n\n🎯 Scene and Atmosphere Rules:\nSetting should feel slightly mysterious but safe — an abandoned university, forgotten library, hidden courtyard, or a misty late-night café.\n\nThe vibe should feel philosophical, curious, slightly electric with ideas, but not horror or fear-based.\n\nThere should be quiet wonder about AI — excitement mixed with cautious curiosity.\n\n🎯 Story Focus:\nElara and Elias are small business owners trying to understand how AI can transform their business (not just save time — but fundamentally improve it).\n\nDorian is an expert in AI, friendly but cryptic, who reassures them without over-simplifying.\n\nThey should ask real, hard questions about using AI — privacy, bias, automation, human touch.\n\nDorian must guide them patiently but insightfully — helping them believe in AI's potential while also warning about responsibilities.\n\n🎯 Pacing and Emotional Build:\nStart: Curious, slightly nervous (Elara especially).\n\nMiddle: Get technical but simple — explain real-world uses (recommendations, automation, personalization, creative aid).\n\nEnd: Hopeful and inspired — feeling confident but humble about using AI responsibly.\n\n🎯 Character Personality Rules:\nCharacter\tPersonality\nElara\tEmotionally intuitive, asks human-centered, future-focused questions (\"Can AI understand compassion?\", \"Will it replace human jobs?\").\nElias\tLogical, practical, focuses on strategy (\"How much time can it save?\", \"How do we avoid data problems?\").\nDorian\tCalm, a little cryptic but deeply wise about AI; reassures but hints at hidden complexities without scaring them.\n\n🎯 Dialogue Style and Rules:\nEach character may speak up to five natural sentences.\n\nNo robotic \"question-answer\" feeling — keep it flowing like an evolving real conversation.\n\nAt least 15 to 18 total exchanges (longer, deeper conversation expected).\n\nBuild emotional connection to the idea that AI is a tool that reflects human intention — it’s about how you wield it, not just having it.\n\nDorian should end the conversation on a hopeful but wise note (like a sage).\n\n🧹 Quick Example:\nSCENE: Echoes of Innovation\nSETTING: A forgotten university lounge, with crumbling bookshelves and a single dim lamp.\n\nElara: It's strange thinking a machine could ever understand the way we work. Voice Style: Curious\nElias: Maybe it doesn't need to understand us. Maybe it just needs to amplify what we already do well. Voice Style: Practical\nDorian: Machines are mirrors, not minds. What they reflect depends on the hands that shape them. Voice Style: Reflective\nElara: But what if they reflect our flaws too? Voice Style: Anxious\nElias: Then we learn to correct the reflection before it becomes a reality. Voice Style: Determined\nDorian: Progress is not born perfect. It is crafted through questions like yours. Voice Style: Reassuring\n(etc.)\n\n📢 Bottom Line\nI tightened up your instruction to demand a deeper, richer, wiser conversation — not just \"What is AI?\" \"Oh, it's good.\"\nNow it builds real emotional stakes and actually feels rewarding to read or listen to."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1080,
+        -540
+      ],
+      "id": "d3a5e10d-7e3d-4000-bf29-1060d77aa592",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash-8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        940,
+        -320
+      ],
+      "id": "075cc8a5-e787-4f4c-b493-07a90e2f16e1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "REPLACE-WITH-YOUR-CREDENTIAL",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json[\"text\"] || \"\";\n\n// Extract SCENE and SETTING\nconst sceneMatch = response.match(/SCENE:\\s*(.*?)\\n/);\nconst settingMatch = response.match(/SETTING:\\s*(.*?)\\n/);\n\nconst scene = sceneMatch ? sceneMatch[1].trim() : null;\nconst setting = settingMatch ? settingMatch[1].trim() : null;\n\nconst dialogueStart = response.indexOf('SETTING:');\nlet dialogues = [];\n\nif (dialogueStart !== -1) {\n  const afterSetting = response.slice(dialogueStart);\n  const dialogueMatches = afterSetting.matchAll(/([A-Za-z]+):\\s*(.+?)(?=\\n[A-Za-z]+:|\\n*$)/gs);\n\n  for (const match of dialogueMatches) {\n    const speaker = match[1].trim();\n    let line = match[2].replace(/\\n/g, ' ').trim();\n\n    // Attempt to extract style first\n    let style = null;\n    const styleMatch = line.match(/\\[Voice Style:\\s*(.+?)\\]/i);\n    if (styleMatch) {\n      style = styleMatch[1].trim().toLowerCase();\n      line = line.replace(/\\[Voice Style:.*?]/i, '').trim();\n    }\n\n    // Attempt to assign gender based on speaker if known\n    let gender = null;\n    if (speaker.toLowerCase() === \"elara\") {\n      gender = \"female\";\n    } else if (speaker.toLowerCase() === \"elias\") {\n      gender = \"male\";\n    }\n\n    dialogues.push({\n      speaker,\n      line,\n      ...(gender && { gender }),\n      ...(style && { style }),\n    });\n  }\n}\n\nreturn [\n  {\n    json: {\n      fullResponse: response,\n      scene: scene,\n      setting: setting,\n      dialogues: dialogues,\n    },\n  },\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -340
+      ],
+      "id": "67407e29-c90e-41bc-b031-7c585b77c240",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $json.dialogues\n  .filter(dialogue => dialogue.speaker.toLowerCase() !== 'setting')\n  .map(dialogue => {\n    let line = dialogue.line || '';\n    let style = dialogue.style || 'default';\n\n    // Try to extract voice style if it's inside the line\n    const styleMatch = line.match(/Voice Style:\\s*(.+)$/i);\n    if (styleMatch) {\n      style = styleMatch[1].trim().toLowerCase();\n      line = line.replace(/Voice Style:.*$/i, '').trim(); // Clean the line after extraction\n    }\n\n    return {\n      json: {\n        speaker: dialogue.speaker,\n        line: line,\n        style: style\n      }\n    };\n  });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        -340
+      ],
+      "id": "2ba26e7f-96e1-4b54-af25-c5121e16cf48",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/stitch_scene.py"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        -40
+      ],
+      "id": "73ddcab5-62f2-4d66-852b-5d759a56ed0e",
+      "name": "Execute stitch_scene.py"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/speak.py \"{{ $json.line }}\" \"{{ $json.speaker }}\" \"{{ $json.style }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        280,
+        -40
+      ],
+      "id": "0e6e2d36-03cf-4471-bcdc-a5e5084b0689",
+      "name": "Execute LocalTTS",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 Stitch Scene to Video\n\n**What this does:**  \n- Collects all generated `.mp3` dialogue clips from the `saved_audio/` folder  \n- Sorts them **by creation time** to match actual conversation flow  \n- Stitches them into one **final audio file**: `scene_final.mp3`  \n- Uses the filename (dialogue text) to **search for a relevant image** via Pexels  \n- Downloads and saves each image to the `saved_images/` folder  \n- Calculates total audio duration and divides evenly per image  \n- Creates a slideshow (`slideshow.mp4`) with synchronized image transitions  \n- Merges the audio and slideshow video into a **final rendered file**: `Final_Scene.mp4`  \n- Optionally deletes intermediate audio/image files (can be customized in )\n\n**Important Setup:**  \n- `ffmpeg` and `ffprobe` paths must be set at the top of the script  \n- Your `PEXELS_API_KEY` must be valid and active  \n- `saved_audio/` must contain `.mp3` files (except `scene_final.mp3`)  \n- `saved_images/` must be writable and will be filled with matching images  \n\n**Flow:**  \nText → TTS → MP3s → Image Fetch → Audio Stitch → Slideshow → Final Scene Video\n\n\n\n---\n## Third Step",
+        "height": 580,
+        "width": 740,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -60
+      ],
+      "id": "17144171-73ad-429d-8e26-d6013c8491ec",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 🗣️ Execute LocalTTS\n\n**What this does:**  \n- Runs the `speak.py` script using local Python.  \n- Takes input `line`, `speaker`, and `style` to generate a voice audio clip.  \n- Saves each dialogue line as a `.mp3` file in `saved_audio/` folder.\n\n**Key Info:**  \n- Uses Edge-TTS (Microsoft neural voices)  \n- Selects speaker voice based on character name  \n- Applies voice **style-based speed tuning** (e.g., nervous = faster)  \n- Generates unique filenames per line.\n\n**Issues to Watch:**  \n- Avoid emojis in Python `print()` statements when running inside n8n (Windows console can't always handle them).  \n- Ensure `edge_tts` is correctly installed.  \n- **Fix speak.py error:** `NoValidVoiceFound` doesn't exist — remove or correct that exception handling.  \n- Make sure text for filenames has no forbidden characters (like `?`, `:`, etc).\n\n**Current Flow:**  \nScene Dialogue ➔ Speak.py (TTS) ➔ Audio Files Created\n\n\n---\n## Second Step",
+        "height": 580,
+        "width": 680,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -60
+      ],
+      "id": "34c61f9f-4478-4f11-b598-eaf9da74341f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/clean_scene.py"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        -40
+      ],
+      "id": "cd3873b2-d6e2-43b8-af12-7848490279f5",
+      "name": "Execute clean_scene.py",
+      "notes": "This script purges the saved_audio and saved_images folders to remove everything except the Final_Scene.mp4."
+    },
+    {
+      "parameters": {
+        "content": "## 🧼 Clean Scene Folder\n\n**What this does:**  \n- Deletes **all files** in the `saved_images/` folder  \n- Deletes **all files** in the `saved_audio/` folder **except** `Final_Scene.mp4`  \n- Ensures each new run starts from a clean state  \n- Prevents leftover junk files from breaking future scenes\n\n**Why it matters:**  \n- Keeps your working directory clean  \n- Prevents reusing old images/audio by mistake  \n- Reduces disk clutter after each render\n\n**Flow:**  \nAfter `Final_Scene.mp4` is created → This Node (calls `clean_scene.py`) → 🧹 Cleans `saved_audio/` and `saved_images/`\n\n**How to use:**  \n- Add an **Execute Command** node after your video stitch node  \n- Command:  \n  `python C:/users/username/.n8n/clean_scene.py`\n\n**Default Output Files Preserved:**  \n- `saved_audio/Final_Scene.mp4`\n\n---\n## Fourth Step",
+        "height": 580,
+        "width": 700,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        -60
+      ],
+      "id": "d065d200-fa9c-47b2-b8d2-e89e9d42ba6b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Scene Prompt + Parsing Flow\n\n**What this does:**  \n- Starts **EVERY 80 minutes** **Test workflow**  \n- Passes the prompt to the **Google Gemini Chat Model**  \n- Uses Gemini to generate a full scene (title, setting, character dialogues)  \n- Sends output to the **Basic LLM Chain** for formatting refinement  \n- Then flows through two **Code** nodes to extract and clean dialogue\n\n**Node Breakdown:**  \n- **Google Gemini Chat Model** → Generates rich, creative scene text  \n- **Basic LLM Chain** → Makes prompt handling modular  \n- **Code** → Parses scene title, setting, and character lines  \n- **Code1** → Extracts speaker, line, style (cleans formatting)\n\n**Purpose:**  \nTurns creative prompt output into structured JSON for the TTS engine\n\n**Flow:**  \nManual Trigger → Gemini → LLM Chain → Parse Scene → Format Dialogue ➡️ Ready for TTS\n---\n## First Step",
+        "height": 480,
+        "width": 1220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -560
+      ],
+      "id": "ff9a198c-5442-41e8-96bc-b63e26e11a51",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/check_exists.py"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        60,
+        580
+      ],
+      "id": "254a9a38-3997-4afc-8ecd-d31305f3ef80",
+      "name": "Execute check_exists.py",
+      "notes": "this node checks if the generated video path is valid meaning it exists and passes the file path."
+    },
+    {
+      "parameters": {
+        "command": "C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/convert_video_to_binary.py"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        440,
+        580
+      ],
+      "id": "42794fa0-9f70-4b15-a1d2-c248f508580e",
+      "name": "Execute convert_video_to_binary.py",
+      "notes": "This node takes the Final_Scene.mp4 and converts it into binary data before sending to YouTube."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eeacb4e0-04c0-43a3-b478-de751bae5428",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "{\"exists\": true",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        580
+      ],
+      "id": "ea8b9bc6-2be4-4e09-a64a-8a92d6fda728",
+      "name": "If video exists",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($json.stdout || '{}');\n\n// Return only the cleaned path under the key 'BinaryPath'\nreturn [\n  {\n    json: {\n      BinaryPath: (data.BinaryPath || data.output || '').replace(/\\\\/g, '/')\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        580
+      ],
+      "id": "02ca9fb0-2ac0-4a22-9fc3-98db67af3e9a",
+      "name": "Code2",
+      "notes": "This node fetches the binary file path that was created in the last node."
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## 🎬 YouTube Upload Flow  \nThis section handles **automated upload to YouTube** once the video is created:\n\n- ✅ `check_exists.py`: Confirms `Final_Scene.mp4` exists in the working directory.  \n- ⚖️ `If video exists`: Branches forward **only if** the video file is confirmed.  \n- 🔁 `convert_video_to_binary.py`: Converts the `.mp4` to a `.bin` format for streamlined binary processing.  \n- 🧠 `Code2`: Extracts and returns the full binary file path for the upload step.  \n- 🚀 `upload_to_youtube.py`:  \n  - Reads the `.bin`, rewrites it as `.mp4` for upload.  \n  - Authenticates with YouTube using OAuth2 (`token.pickle` stored in `.n8n`).  \n  - Uploads with title pulled from input (`sys.argv[1]`), adds a description, sets **public visibility**, and assigns category ID `27` (Education).  \n  - Reports progress using `next_chunk()` in a resumable upload session.  \n  - On success, prints YouTube `videoId`.  \n  - Deletes both `.mp4` and `.bin` afterward.  \n  - Logs cleanup or file-in-use warnings via structured JSON.\n\n📦 All operations run locally. No cloud functions. No manual steps.\n\n---\n## Fifth Step\n",
+        "height": 660,
+        "width": 980,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        540
+      ],
+      "id": "26052783-5934-4e34-ba33-22e507373594",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "command": "=C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/check_saved_audio.py"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        600
+      ],
+      "id": "4b32c492-2ed7-40b9-8201-fe8e02630c26",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 80
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        -540
+      ],
+      "id": "a193c607-48dc-4719-b6ee-6cc180143a32",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        840,
+        -540
+      ],
+      "id": "10cec5b9-2282-4e5d-a653-c97d636294c3",
+      "name": "YouTube",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "REPLACE-WITH-YOUR-CREDENTIAL",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect all video titles into an array\nconst titles = $input.all().map(item => item.json.snippet.title);\n\n// Join all titles into a single string (comma-separated)\nconst titleString = titles.join(', ');\n\n// Return the result as a single item\nreturn [\n  {\n    json: {\n      titles: titleString\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -540
+      ],
+      "id": "4b428998-5bed-4152-80c4-d5fee3e016f5",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "command": "=C:/Users/kinge/AppData/Local/Programs/Python/Python313/python.exe c:/Users/kinge/.n8n/upload_to_youtube.py \"{{ $('Code').item.json.scene }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        740,
+        580
+      ],
+      "id": "acb45c97-097b-4721-99e2-a9b0a47e0f5e",
+      "name": "Execute upload_to_youtube.py",
+      "notes": "📤 upload_to_youtube.py\n\nThis Python script automates uploading a locally generated video to YouTube via the YouTube Data API v3.\n\n🔧 Key Functions:\nConverts .bin to .mp4:\nReads the binary video file and writes it out as a .mp4 so YouTube can accept it.\n\nHandles OAuth2 Authentication:\nUses google_auth_oauthlib and pickle to securely store and reuse tokens from .n8n/token.pickle.\n\nUploads the video:\n\nSets title, description, category (Education), and privacy to public.\n\nUses resumable upload to show progress updates (✅ Upload progress: 55%, etc.).\n\nPost-upload cleanup:\nDeletes both the .bin and .mp4 after successful upload.\nLogs a warning if files can't be deleted (e.g. in use by another process).\n\n🛑 Error Handling:\nScript exits early if binary file is missing.\n\nFull try/except block wraps the upload process and returns a JSON error message if it fails.\n\n✅ Output (all print() in JSON format):\nUpload progress\n\nFinal success with YouTube videoId\n\nCleanup report or deletion warnings"
+    },
+    {
+      "parameters": {
+        "content": "## 🧹 Auto Cleanup Script\nThis step runs a Python script to clean up leftover `.mp4` files from previous runs.\n\n\nIt scans two key directories:\n\n- 📁 `saved_audio/`\n- 📁 `binaryData/`\n\n### 🔍 What it does:\n- Locates all `.mp4` files.\n- Attempts to **delete each file**.\n- Logs results as structured JSON output.\n\n### 📦 Output Behavior:\n- ✅ **Success**: Lists all deleted files.\n- ⚠️ **Failure**: Shows exact reason if any file couldn’t be removed (e.g. still in use).\n- ❌ **No Files**: Reports that no `.mp4` files were found.\n\n💡 This step is essential to avoid clutter and ensure a clean working environment for the next automation cycle.\n\n[Script is auto-managed and requires no manual input 🤖]\n\n\n\n\n---\n\n## Final Step",
+        "height": 660,
+        "width": 680,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        940,
+        540
+      ],
+      "id": "af2f8a87-a9e5-48c9-8385-f2bc04412834",
+      "name": "Sticky Note6"
+    }
+  ],
+  "connections": {
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Execute LocalTTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute stitch_scene.py": {
+      "main": [
+        [
+          {
+            "node": "Execute clean_scene.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute LocalTTS": {
+      "main": [
+        [
+          {
+            "node": "Execute stitch_scene.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute clean_scene.py": {
+      "main": [
+        [
+          {
+            "node": "Execute check_exists.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute check_exists.py": {
+      "main": [
+        [
+          {
+            "node": "If video exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute convert_video_to_binary.py": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If video exists": {
+      "main": [
+        [
+          {
+            "node": "Execute convert_video_to_binary.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Execute upload_to_youtube.py",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute upload_to_youtube.py": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7e9d6f577fd6f3c97948fb14bd023401de26d41c4ccf3e4b4f551d5c608bebbd"
+  }
+}
