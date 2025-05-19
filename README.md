@@ -33,9 +33,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-pyt
 pip install requests
 ```
 📁 Folder Structure
-css
-Copy
-Edit
+```
 .n8n/
 ├── speak.py
 ├── stitch_scene.py
@@ -47,6 +45,7 @@ Edit
 saved_audio/
 saved_images/
 binaryData/
+```
 🔐 YouTube API Setup
 Go to: Google Cloud Console
 
