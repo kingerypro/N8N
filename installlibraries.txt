@@ -1,0 +1,1 @@
+pip install edge-tts pygame pydub requests google-api-python-client google-auth-oauthlib google-auth
