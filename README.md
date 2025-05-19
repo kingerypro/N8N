@@ -32,14 +32,14 @@ auto_setup.bat
 pip install edge-tts
 pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
 pip install requests
-
-
-## 📦 Install Python Libraries
+```
 
 ```bash
 pip install edge-tts
 pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
 pip install requests
+
+```
 📁 Folder Structure
 css
 Copy
