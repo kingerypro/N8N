@@ -20,7 +20,7 @@ This is a fully offline-first automated workflow using **n8n** to generate and p
 
 Run this first:
 
-```bash
+```
 auto_setup.bat
 ✅ This checks your Python and FFmpeg environment and auto-installs any missing libraries.
 ```
@@ -65,10 +65,10 @@ Create an account and get your API key
 
 In stitch_scene.py, replace the placeholder with your key:
 
-python
-Copy
 Edit
+```
 PEXELS_API_KEY = "YOUR_KEY_HERE"
+```
 ▶️ How To Run
 Use the Manual Trigger in n8n to test
 
