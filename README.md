@@ -24,24 +24,11 @@ This is a fully offline-first automated workflow using **n8n** to generate and p
 
 ---
 
-## 🚀 Features
-
-- 🧠 Converts AI prompts into flowing dialogue with natural emotion
-- 🗣️ Uses **Edge TTS** locally for high-quality voice clips
-- 🖼️ Fetches relevant images from **Pexels API**
-- 🎞️ Stitches video scenes using **FFmpeg**
-- 💾 Converts the final video to binary and uploads it via **YouTube Data API**
-- 🧹 Auto-cleans temp files after each run
-- ⏰ Manual or scheduled runs (default: every 80 minutes)
-
----
-
-
 ## 🛠️ Start Here
 
 Before doing anything else, run:
 ```bash
-check_1.bat
+check_1.bat - just click this file in the same N8N folder directory
 ```
 ✅ This checks that your Python and FFmpeg environment is set up properly before the automation runs.
 
