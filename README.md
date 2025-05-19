@@ -1,35 +1,27 @@
 # 🎬 N8N YouTube Short Generator (Offline + Auto Upload)
 
-This is a fully offline-first automated workflow using **n8n** to generate and publish YouTube Shorts using AI, TTS, and local tools.
-
-## 🚀 Features
-
-- 🧠 Converts AI prompts into flowing dialogue with natural emotion
-- 🗣️ Uses **Edge TTS** locally for high-quality voice clips
-- 🖼️ Pulls relevant images from **Pexels API**
-- 🎞️ Stitches video with **FFmpeg** (local install)
-- 💾 Converts to binary and uploads with **YouTube Data API**
-- 🧹 Cleans up temp files for a fresh run each time
-- ⏰ Runs manually or on a schedule (every 80 minutes by default)
+This is a fully offline-first automated workflow using **n8n** to generate and publish YouTube Shorts using AI, TTS, and local tools — no OpenAI, no subscriptions, no BS.
 
 ---
 
-## 🔧 Requirements
+## 🚀 Features
 
-- Python 3.9+
-- FFmpeg + FFprobe (added to system PATH)
-- Self-hosted n8n
-- Google Cloud Project with YouTube Data API v3 enabled
-- Pexels API key
+- 🧠 Converts AI prompts into flowing dialogue with natural emotion  
+- 🗣️ Uses **Edge TTS** locally for high-quality voice clips  
+- 🖼️ Pulls relevant images from **Pexels API**  
+- 🎞️ Stitches video using **FFmpeg** (local install)  
+- 💾 Converts to binary and uploads via **YouTube Data API**  
+- 🧹 Auto-cleans temp folders after every run  
+- ⏰ Runs manually or on a schedule (every 80 minutes by default)
 
 ---
 
 ## 🛠️ Start Here
 
-Before doing anything else, run:
+Run this first:
 ```bash
-check_1.bat - just click this file in the same N8N folder directory
-```
+auto_setup.bat
+
 ✅ This checks that your Python and FFmpeg environment is set up properly before the automation runs.
 
 ---
