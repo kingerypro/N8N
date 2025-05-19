@@ -21,7 +21,7 @@ This is a fully offline-first automated workflow using **n8n** to generate and p
 Run this first:
 ```bash
 auto_setup.bat
-
+```
 ✅ This checks that your Python and FFmpeg environment is set up properly before the automation runs.
 
 ---
